@@ -3,38 +3,41 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { map } from 'rxjs/operators';
 import { Observable, of as observableOf, merge } from 'rxjs';
+import { AppService } from '../app.service';
+import { HttpClient } from '@angular/common/http'
+
 
 // TODO: Replace this with your own data model type
 export interface PlayerStatsTableItem {
-  name: string;
-  id: number;
+  username: string;
+  timePlayed: number;
 }
 
 // TODO: replace this with real data from your application
 const EXAMPLE_DATA: PlayerStatsTableItem[] = [
-  {id: 1, name: 'Hydrogen'},
-  {id: 2, name: 'Helium'},
-  {id: 3, name: 'Lithium'},
-  {id: 4, name: 'Beryllium'},
-  {id: 5, name: 'Boron'},
-  {id: 6, name: 'Carbon'},
-  {id: 7, name: 'Nitrogen'},
-  {id: 8, name: 'Oxygen'},
-  {id: 9, name: 'Fluorine'},
-  {id: 10, name: 'Neon'},
-  {id: 11, name: 'Sodium'},
-  {id: 12, name: 'Magnesium'},
-  {id: 13, name: 'Aluminum'},
-  {id: 14, name: 'Silicon'},
-  {id: 15, name: 'Phosphorus'},
-  {id: 16, name: 'Sulfur'},
-  {id: 17, name: 'Chlorine'},
-  {id: 18, name: 'Argon'},
-  {id: 19, name: 'Potassium'},
-  {id: 20, name: 'Calcium'},
+  {timePlayed: 1, username: 'Hydrogen'},
+  {timePlayed: 2, username: 'Helium'},
+  {timePlayed: 3, username: 'Lithium'},
+  {timePlayed: 4, username: 'Beryllium'},
+  {timePlayed: 5, username: 'Boron'},
+  {timePlayed: 6, username: 'Carbon'},
+  {timePlayed: 7, username: 'Nitrogen'},
+  {timePlayed: 8, username: 'Oxygen'},
+  {timePlayed: 9, username: 'Fluorine'},
+  {timePlayed: 10, username: 'Neon'},
+  {timePlayed: 11, username: 'Sodium'},
+  {timePlayed: 12, username: 'Magnesium'},
+  {timePlayed: 13, username: 'Aluminum'},
+  {timePlayed: 14, username: 'Silicon'},
+  {timePlayed: 15, username: 'Phosphorus'},
+  {timePlayed: 16, username: 'Sulfur'},
+  {timePlayed: 17, username: 'Chlorine'},
+  {timePlayed: 18, username: 'Argon'},
+  {timePlayed: 19, username: 'Potassium'},
+  {timePlayed: 20, username: 'Calcium'},
 ];
 
-const USER_CACHE: PlayerStatsTableItem[] = [];
+let USER_CACHE: PlayerStatsTableItem[] = [];
 
 /**
  * Data source for the PlayerStatsTable view. This class should
@@ -46,9 +49,17 @@ export class PlayerStatsTableDataSource extends DataSource<PlayerStatsTableItem>
   paginator: MatPaginator | undefined;
   sort: MatSort | undefined;
 
-  constructor() {
+  constructor(private httpClient: HttpClient) {
     super();
+    
   }
+
+  playtimeEndpoint = 'localhost:8080/playerstats/playtime';
+
+  private fetchData() {
+    return this.httpClient.get(this.playtimeEndpoint);
+  }
+
 
   /**
    * Connect this data source to the table. The table will only update when
@@ -56,6 +67,7 @@ export class PlayerStatsTableDataSource extends DataSource<PlayerStatsTableItem>
    * @returns A stream of the items to be rendered.
    */
   connect(): Observable<PlayerStatsTableItem[]> {
+    console.log(this.fetchData());
     if (this.paginator && this.sort) {
       // Combine everything that affects the rendered data into one update
       // stream for the data-table to consume.
@@ -99,15 +111,15 @@ export class PlayerStatsTableDataSource extends DataSource<PlayerStatsTableItem>
     return data.sort((a, b) => {
       const isAsc = this.sort?.direction === 'asc';
       switch (this.sort?.active) {
-        case 'name': return compare(a.name, b.name, isAsc);
-        case 'id': return compare(+a.id, +b.id, isAsc);
+        case 'username': return compare(a.username, b.username, isAsc);
+        case 'timePlayed': return compare(+a.timePlayed, +b.timePlayed, isAsc);
         default: return 0;
       }
     });
   }
 }
 
-/** Simple sort comparator for example ID/Name columns (for client-side sorting). */
+/** Simple sort comparator for example timePlayed/username columns (for client-side sorting). */
 function compare(a: string | number, b: string | number, isAsc: boolean): number {
   return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
 }
